@@ -58,6 +58,24 @@ func gitChangeTypeToThickResponseType(typ int) string {
 	}
 }
 
+const (
+	// Megabyte is 1024 kilo-bytes
+	Megabyte = 1024 * 1024
+)
+
+func capFileSize(d []byte) []byte {
+	n := len(d)
+	if n > Megabyte {
+		s := fmt.Sprintf("Large file, size: %d bytes", n)
+		return []byte(s)
+	}
+	if http.DetectContentType(d) == "application/octet-stream" {
+		s := fmt.Sprintf("Binary file, size: %d bytes", n)
+		return []byte(s)
+	}
+	return d
+}
+
 // ThickResponseFromGitChange creates ThickResponse out of GitChange
 func ThickResponseFromGitChange(c *GitChange) ThickResponse {
 	var res ThickResponse
@@ -84,6 +102,8 @@ func ThickResponseFromGitChange(c *GitChange) ThickResponse {
 		res.contentBefore = nil
 		res.contentAfter = readFileMust(c.Path)
 	}
+	res.contentBefore = capFileSize(res.contentBefore)
+	res.contentAfter = capFileSize(res.contentAfter)
 	res.IsImage = isImageFile(c.Path)
 	res.NoChanges = bytes.Equal(res.contentBefore, res.contentAfter)
 	return res
