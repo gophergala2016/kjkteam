@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -56,6 +57,23 @@ func toTrimmedLines(d []byte) []string {
 		}
 	}
 	return lines[:i]
+}
+
+func readFileMust(path string) []byte {
+	d, err := ioutil.ReadFile(path)
+	fataliferr(err)
+	return d
+}
+
+func isImageFile(path string) bool {
+	ext := strings.ToLower(filepath.Ext(path))
+	knownImageExtensions := []string{".png", ".jpg", ".jpeg", ".bmp", ".tiff"}
+	for _, s := range knownImageExtensions {
+		if s == ext {
+			return true
+		}
+	}
+	return false
 }
 
 func runCmd(exePath string, args ...string) ([]byte, error) {
