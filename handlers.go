@@ -35,13 +35,23 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 	serveFile(w, r, path)
 }
 
+const (
+	TypeAdd    = "add"
+	TypeDelete = "delete"
+	TypeMove   = "move"
+	TypeChange = "change"
+)
+
 // ThickResponse describes response for /thick/:idx
 type ThickResponse struct {
-	LeftPath  string `json:"a"`
-	RightPath string `json:"b"`
-	IsImage   bool   `json:"is_image_diff"`
-	NoChanges bool   `json:"no_changes"`
-	Type      string `json:"type"`
+	BeforePath string `json:"a"`
+	AfterPath  string `json:"b"`
+	IsImage    bool   `json:"is_image_diff"`
+	NoChanges  bool   `json:"no_changes"`
+	// Type is "add", "delete", "move", "change"
+	Type          string `json:"type"`
+	contentBefore []byte
+	contentAfter  []byte
 }
 
 // /thick/:idx
