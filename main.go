@@ -15,4 +15,5 @@ func main() {
 	cdToGitRoot()
 	gitChanges := gitStatusMust()
 	dumpGitChanges(gitChanges)
+	startWebServer()
 }
