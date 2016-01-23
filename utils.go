@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"io/ioutil"
+	"mime"
 	"os"
 	"os/exec"
 	"path/filepath"
@@ -86,4 +87,29 @@ func runCmdNoWait(exePath string, args ...string) error {
 	cmd := exec.Command(exePath, args...)
 	fmt.Printf("running: %s %v\n", filepath.Base(exePath), args)
 	return cmd.Start()
+}
+
+var extraMimeTypes = map[string]string{
+	".icon": "image-x-icon",
+	".ttf":  "application/x-font-ttf",
+	".woff": "application/x-font-woff",
+	".eot":  "application/vnd.ms-fontobject",
+	".svg":  "image/svg+xml",
+}
+
+// MimeTypeByExtensionExt is like mime.TypeByExtension but supports more types
+// and defaults to text/plain
+func MimeTypeByExtensionExt(name string) string {
+	ext := strings.ToLower(filepath.Ext(name))
+	result := mime.TypeByExtension(ext)
+
+	if result == "" {
+		result = extraMimeTypes[ext]
+	}
+
+	if result == "" {
+		result = "text/plain; charset=utf-8"
+	}
+
+	return result
 }

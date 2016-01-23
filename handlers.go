@@ -6,6 +6,7 @@ import (
 	"encoding/json"
 	"fmt"
 	"net/http"
+	"os"
 	"path/filepath"
 	"strconv"
 	"strings"
@@ -36,6 +37,7 @@ type ThickResponse struct {
 	NoChanges  bool    `json:"no_changes"`
 	// Type is "add", "delete", "move", "change"
 	Type          string `json:"type"`
+	Index         int    `json:"idx"`
 	contentBefore []byte
 	contentAfter  []byte
 }
@@ -89,10 +91,11 @@ func ThickResponseFromGitChange(c *GitChange) ThickResponse {
 
 func buildGlobalChanges(gitChanges []*GitChange) {
 	var changes []*Change
-	for _, c := range gitChanges {
+	for i, c := range gitChanges {
 		gc := &Change{}
 		gc.GitChange = *c
 		gc.ThickResponse = ThickResponseFromGitChange(c)
+		gc.ThickResponse.Index = i
 		changes = append(changes, gc)
 	}
 
@@ -144,13 +147,29 @@ func httpOkWithJSON(w http.ResponseWriter, r *http.Request, v interface{}) {
 	httpOkBytesWithContentType(w, r, "application/json", b)
 }
 
+func serveIndexPage(w http.ResponseWriter, r *http.Request) {
+	var pairs []*ThickResponse
+	mu.Lock()
+	for _, gc := range globalChanges {
+		pairs = append(pairs, &gc.ThickResponse)
+	}
+	mu.Unlock()
+	v := struct {
+		Pairs []*ThickResponse
+	}{
+		Pairs: pairs,
+	}
+	execTemplate(w, tmplIndex, v)
+}
+
 func handleIndex(w http.ResponseWriter, r *http.Request) {
 	uri := r.URL.Path
 	method := r.Method
 	fmt.Printf("%s '%s'\n", method, uri)
 	path := uri[1:]
 	if path == "" {
-		path = "index.html"
+		serveIndexPage(w, r)
+		return
 	}
 	serveFile(w, r, path)
 }
@@ -186,9 +205,67 @@ func handleThick(w http.ResponseWriter, r *http.Request) {
 	httpOkWithJSON(w, r, tr)
 }
 
+func strPtrToLower(s *string) string {
+	if s == nil {
+		return ""
+	}
+	return strings.ToLower(*s)
+}
+
+func findByPath(path string) *ThickResponse {
+	path = strings.ToLower(path)
+	mu.Lock()
+	defer mu.Unlock()
+	var p string
+	for _, gc := range globalChanges {
+		p = strPtrToLower(gc.BeforePath)
+		if p == path {
+			return &gc.ThickResponse
+		}
+		p = strPtrToLower(gc.AfterPath)
+		if p == path {
+			return &gc.ThickResponse
+		}
+	}
+	return nil
+}
+
+func handleGetContents(w http.ResponseWriter, r *http.Request, which string) {
+	path := r.FormValue("path")
+	fmt.Printf("/%s/get_contents, path='%s'\n", which, path)
+	tr := findByPath(path)
+	if tr == nil {
+		http.NotFound(w, r)
+		return
+	}
+	var d []byte
+	if which == "a" {
+		d = tr.contentBefore
+	} else {
+		d = tr.contentAfter
+	}
+	mime := MimeTypeByExtensionExt(path)
+	httpOkBytesWithContentType(w, r, mime, d)
+}
+
+func handdleGetContentsA(w http.ResponseWriter, r *http.Request) {
+	handleGetContents(w, r, "a")
+}
+
+func handdleGetContentsB(w http.ResponseWriter, r *http.Request) {
+	handleGetContents(w, r, "b")
+}
+
+func handleKill(w http.ResponseWriter, r *http.Request) {
+	os.Exit(0)
+}
+
 func registerHandlers() {
 	http.HandleFunc("/", handleIndex)
 	http.HandleFunc("/thick/", handleThick)
+	http.HandleFunc("/a/get_contents", handdleGetContentsA)
+	http.HandleFunc("/b/get_contents", handdleGetContentsB)
+	http.HandleFunc("/kill", handleKill)
 }
 
 func startWebServer() {

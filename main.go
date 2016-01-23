@@ -1,6 +1,9 @@
 package main
 
-import "fmt"
+import (
+	"fmt"
+	"os"
+)
 
 // Change combines a GitChange and corresponding server response
 type Change struct {
@@ -22,6 +25,9 @@ func main() {
 	gitChanges := gitStatusMust()
 	buildGlobalChanges(gitChanges)
 	dumpGitChanges(gitChanges)
-
+	if len(globalChanges) == 0 {
+		fmt.Printf("There are no changes!\n")
+		os.Exit(0)
+	}
 	startWebServer()
 }

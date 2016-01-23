@@ -30,7 +30,8 @@
 <script src="/static/js/file_diff.js"></script>
 
 <script>
-var pairs = [{"a": "main.go", "b": "main.go", "idx": 0, "type": "change"}];
+var pairs = {{ .Pairs }};
+//[{"a": "main.go", "b": "main.go", "idx": 0, "type": "change"}];
 var initialIdx = 0;
 var HAS_IMAGE_MAGICK = false;
 </script>
