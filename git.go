@@ -11,7 +11,10 @@ import (
 type GitChange struct {
 	Type int // Modified, Added etc.
 	Path string
-	Name string
+}
+
+func (c *GitChange) GetName() string {
+	return filepath.Base(c.Path)
 }
 
 const (
@@ -57,7 +60,6 @@ func parseGitStatusLineMust(s string) *GitChange {
 		fatalif(true, "invalid line: '%s'\n", s)
 	}
 	c.Path = strings.TrimSpace(parts[1])
-	c.Name = filepath.Base(c.Path)
 	return c
 }
 
