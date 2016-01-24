@@ -34,6 +34,13 @@ func fatalif(cond bool, format string, args ...interface{}) {
 		fatalf(format, args...)
 	}
 }
+func isMac() bool {
+	return runtime.GOOS == "darwin"
+}
+
+func isWindows() bool {
+	return runtime.GOOS == "windows"
+}
 
 func detectExeMust(name string) string {
 	path, err := exec.LookPath(name)
@@ -112,4 +119,26 @@ func MimeTypeByExtensionExt(name string) string {
 	}
 
 	return result
+}
+
+func openDefaultBrowserMac(uri string) error {
+	cmd := exec.Command("open", uri)
+	return cmd.Run()
+}
+
+func openDefaultBrowserWin(uri string) error {
+	runDll32 := filepath.Join(os.Getenv("SYSTEMROOT"), "System32", "rundll32.exe")
+	return exec.Command(runDll32, "url.dll,FileProtocolHandler", uri).Run()
+}
+
+func openDefaultBrowser(uri string) error {
+	var err error
+	if isMac() {
+		err = openDefaultBrowserMac(uri)
+	} else if isWindows() {
+		err = openDefaultBrowserWin(uri)
+	} else {
+		err = fmt.Errorf("unsupported platform: %s", runtime.GOOS)
+	}
+	return err
 }

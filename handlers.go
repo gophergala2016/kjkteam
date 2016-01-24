@@ -11,6 +11,7 @@ import (
 	"strconv"
 	"strings"
 	"sync"
+	"time"
 
 	"github.com/kjk/log"
 	"github.com/kjk/u"
@@ -290,6 +291,13 @@ func registerHandlers() {
 
 func startWebServer() {
 	registerHandlers()
+
+	go func(uri string) {
+		time.Sleep(time.Second)
+		fmt.Printf("Opening browser with '%s'\n", uri)
+		openDefaultBrowser(uri)
+	}("http://" + httpAddr)
+
 	fmt.Printf("Started runing on %s\n", httpAddr)
 	if err := http.ListenAndServe(httpAddr, nil); err != nil {
 		fmt.Printf("http.ListendAndServer() failed with %s\n", err)
