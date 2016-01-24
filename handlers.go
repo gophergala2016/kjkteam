@@ -223,7 +223,6 @@ func handleThick(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	}
-	fmt.Printf("idx: %d\n", idx)
 	tr := getThickResponseByIdx(idx)
 	if tr == nil {
 		http.NotFound(w, r)

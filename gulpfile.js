@@ -26,8 +26,8 @@ var t_babelify = ['babelify', {
 
 gulp.task('jsvendor', function() {
   return gulp.src([
-    'www/static/components/jquery/dist/jquery.min.js',
-    'www/static/components/underscore/underscore.js',
+    'node_modules/jquery/dist/jquery.min.js',
+    'node_modules/underscore/underscore-min.js',
     'www/static/components/highlightjs/highlight.pack.js',
     'js/codediff.js/difflib.js',
     'js/codediff.js/codediff.js',
