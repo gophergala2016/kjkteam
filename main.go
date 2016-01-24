@@ -1,11 +1,15 @@
 package main
 
 import (
+	"flag"
 	"fmt"
-	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
+)
+
+var (
+	flgDev bool
 )
 
 // Change combines a GitChange and corresponding server response
@@ -17,7 +21,7 @@ type Change struct {
 func dumpGitChanges(gitChanges []*GitChange) {
 	for _, change := range gitChanges {
 		typ := gitTypeToString(change.Type)
-		fmt.Printf("%s, '%s'\n", typ, change.Path)
+		LogVerbosef("%s, '%s'\n", typ, change.Path)
 	}
 }
 
@@ -53,23 +57,21 @@ func gitStatusExpandDirs(changes []*GitChange) []*GitChange {
 	return res
 }
 
-func testDetectContentType() {
-	path := "differ_resources.zip"
-	d, err := ioutil.ReadFile(path)
-	fataliferr(err)
-	fmt.Printf("File '%s', isBinary: %v\n", path, isBinaryData(d))
-	os.Exit(0)
+func parseFlags() {
+	flag.BoolVar(&flgDev, "dev", false, "running in dev mode")
+	flag.Parse()
 }
 
 func main() {
-	fmt.Printf("getting list of changed files\n")
-	if false {
-		testDetectContentType()
+	parseFlags()
+	if flgDev {
+		verboseLogging = true
 	}
+	LogVerbosef("getting list of changed files\n")
 	detectGitExeMust()
 	cdToGitRoot()
 	if hasZipResources() {
-		fmt.Printf("Using resources from zip file\n")
+		LogVerbosef("Using resources from zip file\n")
 		loadResourcesFromEmbeddedZip()
 	}
 

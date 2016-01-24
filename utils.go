@@ -48,7 +48,7 @@ func detectExeMust(name string) string {
 		//fmt.Printf("'%s' is '%s'\n", name, path)
 		return path
 	}
-	fmt.Printf("Couldn't find '%s'\n", name)
+	LogErrorf("Couldn't find '%s'\n", name)
 	fataliferr(err)
 	return ""
 }
@@ -121,13 +121,13 @@ func isImageFile(path string) bool {
 
 func runCmd(exePath string, args ...string) ([]byte, error) {
 	cmd := exec.Command(exePath, args...)
-	fmt.Printf("running: %s %v\n", filepath.Base(exePath), args)
+	LogVerbosef("running: %s %v\n", filepath.Base(exePath), args)
 	return cmd.Output()
 }
 
 func runCmdNoWait(exePath string, args ...string) error {
 	cmd := exec.Command(exePath, args...)
-	fmt.Printf("running: %s %v\n", filepath.Base(exePath), args)
+	LogVerbosef("running: %s %v\n", filepath.Base(exePath), args)
 	return cmd.Start()
 }
 

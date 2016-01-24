@@ -1,7 +1,6 @@
 package main
 
 import (
-	"fmt"
 	"io/ioutil"
 	"os"
 	"path/filepath"
@@ -40,7 +39,7 @@ func gitTypeToString(n int) string {
 }
 
 func catGitHeadToFileMust(dst, gitPath string) {
-	fmt.Printf("catGitHeadToFileMust: %s => %s\n", gitPath, dst)
+	LogVerbosef("catGitHeadToFileMust: %s => %s\n", gitPath, dst)
 	d := gitGetFileContentHeadMust(gitPath)
 	f, err := os.Create(dst)
 	fataliferr(err)
@@ -128,7 +127,7 @@ func cdToGitRoot() {
 		dir = newDir
 	}
 	if newDir != "" {
-		fmt.Printf("Changed current dir to: '%s'\n", newDir)
+		LogVerbosef("Changed current dir to: '%s'\n", newDir)
 		os.Chdir(newDir)
 	}
 }

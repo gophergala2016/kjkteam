@@ -219,13 +219,13 @@ func serveData(w http.ResponseWriter, r *http.Request, code int, contentType str
 
 func serveResourceFromZip(w http.ResponseWriter, r *http.Request, path string) {
 	path = normalizePath(path)
-	fmt.Printf("serving '%s' from zip\n", path)
+	LogVerbosef("serving '%s' from zip\n", path)
 
 	data := resourcesFromZip[path]
 	gzippedData := resourcesFromZip[path+".gz"]
 
 	if data == nil {
-		fmt.Printf("no data for file '%s'\n", path)
+		LogVerbosef("no data for file '%s'\n", path)
 		servePlainText(w, r, 404, fmt.Sprintf("file '%s' not found", path))
 		return
 	}
@@ -239,7 +239,7 @@ func serveResourceFromZip(w http.ResponseWriter, r *http.Request, path string) {
 }
 
 func serveFile(w http.ResponseWriter, r *http.Request, fileName string) {
-	//fmt.Printf("serverFile: fileName='%s'\n", fileName)
+	//LogVerbosef("serverFile: fileName='%s'\n", fileName)
 	path := filepath.Join("www", fileName)
 	if hasZipResources() {
 		serveResourceFromZip(w, r, path)
@@ -248,7 +248,7 @@ func serveFile(w http.ResponseWriter, r *http.Request, fileName string) {
 	if u.PathExists(path) {
 		http.ServeFile(w, r, path)
 	} else {
-		fmt.Printf("file '%s' doesn't exist\n", path)
+		LogVerbosef("file '%s' doesn't exist\n", path)
 		http.NotFound(w, r)
 	}
 }
@@ -271,7 +271,7 @@ func servePlainText(w http.ResponseWriter, r *http.Request, code int, format str
 		_, err = w.Write([]byte(format))
 	}
 	if err != nil {
-		fmt.Printf("err: '%s'\n", err)
+		LogErrorf("err: '%s'\n", err)
 	}
 }
 
@@ -321,7 +321,7 @@ func serveIndexPage(w http.ResponseWriter, r *http.Request) {
 func handleIndex(w http.ResponseWriter, r *http.Request) {
 	uri := r.URL.Path
 	method := r.Method
-	fmt.Printf("%s '%s'\n", method, uri)
+	LogVerbosef("%s '%s'\n", method, uri)
 	path := uri[1:]
 	if path == "" {
 		serveIndexPage(w, r)
@@ -343,11 +343,11 @@ func getThickResponseByIdx(idx int) *ThickResponse {
 // /thick/:idx
 func handleThick(w http.ResponseWriter, r *http.Request) {
 	uri := r.URL.Path
-	fmt.Printf("handleThick uri='%s'\n", uri)
+	LogVerbosef("handleThick uri='%s'\n", uri)
 	idxStr := uri[len("/thick/"):]
 	idx, err := strconv.Atoi(idxStr)
 	if err != nil {
-		fmt.Printf("missing argument in '%s'\n", uri)
+		LogErrorf("missing argument in '%s'\n", uri)
 		http.NotFound(w, r)
 		return
 	}
@@ -387,7 +387,7 @@ func findByPath(path string) *ThickResponse {
 
 func handleGetContents(w http.ResponseWriter, r *http.Request, which string) {
 	path := r.FormValue("path")
-	fmt.Printf("/%s/get_contents, path='%s'\n", which, path)
+	LogVerbosef("/%s/get_contents, path='%s'\n", which, path)
 	tr := findByPath(path)
 	if tr == nil {
 		http.NotFound(w, r)
@@ -417,7 +417,7 @@ func handdleGetContentsB(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleKill(w http.ResponseWriter, r *http.Request) {
-	fmt.Printf("handleKill, url: '%s'\n", r.URL.Path)
+	LogVerbosef("handleKill, url: '%s'\n", r.URL.Path)
 	os.Exit(0)
 }
 
@@ -434,13 +434,13 @@ func startWebServer() {
 
 	go func(uri string) {
 		time.Sleep(time.Second)
-		fmt.Printf("Opening browser with '%s'\n", uri)
+		LogVerbosef("Opening browser with '%s'\n", uri)
 		openDefaultBrowser(uri)
 	}("http://" + httpAddr)
 
-	fmt.Printf("Started runing on %s\n", httpAddr)
+	LogVerbosef("Started runing on %s\n", httpAddr)
 	if err := http.ListenAndServe(httpAddr, nil); err != nil {
-		fmt.Printf("http.ListendAndServer() failed with %s\n", err)
+		LogErrorf("http.ListendAndServer() failed with %s\n", err)
 	}
-	fmt.Printf("Exited\n")
+	LogVerbosef("Exited\n")
 }
