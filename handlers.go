@@ -51,6 +51,8 @@ func gitChangeTypeToThickResponseType(typ int) string {
 		return TypeAdd
 	case Deleted:
 		return TypeDelete
+	case Renamed:
+		return TypeMove
 	case NotCheckedIn:
 		return TypeAdd
 	default:
@@ -97,6 +99,11 @@ func ThickResponseFromGitChange(c *GitChange) ThickResponse {
 		res.AfterPath = nil
 		res.contentBefore = gitGetFileContentHeadMust(c.Path)
 		res.contentAfter = nil
+	case Renamed:
+		res.BeforePath = &c.Path
+		res.AfterPath = &c.Path2
+		res.contentBefore = gitGetFileContentHeadMust(c.Path)
+		res.contentAfter = readFileMust(c.Path2)
 	case NotCheckedIn:
 		res.BeforePath = nil
 		res.AfterPath = &c.Path

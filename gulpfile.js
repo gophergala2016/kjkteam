@@ -29,9 +29,9 @@ gulp.task('jsvendor', function() {
     'www/static/components/jquery/dist/jquery.min.js',
     'www/static/components/underscore/underscore.js',
     'www/static/components/highlightjs/highlight.pack.js',
-    'www//static/codediff.js/difflib.js',
-    'www/static/codediff.js/codediff.js',
-    'www/static/js/file_diff.js'
+    'js/codediff.js/difflib.js',
+    'js/codediff.js/codediff.js',
+    'js/file_diff.js'
   ])
   .pipe(concat('vendor.js'))
   .pipe(gulp.dest('www/static/dist'));
