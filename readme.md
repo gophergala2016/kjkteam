@@ -16,6 +16,8 @@ To build from sources:
 * `npm install` to get the needed JavaScript libraries for the front-end
 * `scripts/build.sh` to build a self-contained `differ` executable
 
+Not good enought to win? I beg to differ.
+
 TODO:
 * directory compare
 * `git scdiff` support
