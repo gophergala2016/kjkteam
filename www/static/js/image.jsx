@@ -7,10 +7,10 @@ import React from 'react';
 
 import { SetIntervalMixin } from './util.js';
 
-var IMAGE_DIFF_MODES = ['side-by-side', 'blink', 'onion-skin', 'swipe'];
+export var IMAGE_DIFF_MODES = ['side-by-side', 'blink', 'onion-skin', 'swipe'];
 
 // A widget to toggle between image diff modes (blink or side-by-side).
-var ImageDiffModeSelector = React.createClass({
+export var ImageDiffModeSelector = React.createClass({
   propTypes: {
     filePair: React.PropTypes.object.isRequired,
     imageDiffMode: React.PropTypes.oneOf(IMAGE_DIFF_MODES).isRequired,
@@ -49,7 +49,7 @@ var ImageDiffModeSelector = React.createClass({
 });
 
 // A diff between two images.
-var ImageDiff = React.createClass({
+export var ImageDiff = React.createClass({
   propTypes: {
     filePair: React.PropTypes.object.isRequired,
     imageDiffMode: React.PropTypes.oneOf(IMAGE_DIFF_MODES).isRequired,
@@ -163,7 +163,7 @@ var ImageDiff = React.createClass({
  * Returns a React.DIV which boxes the changed parts of the image pair.
  * scaleDown is in [0, 1], with 1 being full-size
  */
-function makePerceptualBoxDiv(pdiffMode, filePair, scaleDown) {
+export function makePerceptualBoxDiv(pdiffMode, filePair, scaleDown) {
   if (pdiffMode == PDIFF_MODE.OFF ||
       !isSameSizeImagePair(filePair)) {
     return null;
@@ -199,7 +199,7 @@ function makePerceptualBoxDiv(pdiffMode, filePair, scaleDown) {
 }
 
 
-var AnnotatedImage = React.createClass({
+export var AnnotatedImage = React.createClass({
   propTypes: {
     filePair: React.PropTypes.object.isRequired,
     side: React.PropTypes.oneOf(['a', 'b']).isRequired,
@@ -223,7 +223,7 @@ var AnnotatedImage = React.createClass({
 });
 
 
-var SingleImage = React.createClass({
+export var SingleImage = React.createClass({
   propTypes: {
     filePair: React.PropTypes.object.isRequired,
     side: React.PropTypes.oneOf(['a', 'b']).isRequired,
@@ -259,7 +259,7 @@ var SingleImage = React.createClass({
 });
 
 
-var ImageMetadata = React.createClass({
+export var ImageMetadata = React.createClass({
   propTypes: {
     image: React.PropTypes.object.isRequired
   },
@@ -276,7 +276,7 @@ var ImageMetadata = React.createClass({
 
 
 // Two images placed side-by-side.
-var ImageSideBySide = React.createClass({
+export var ImageSideBySide = React.createClass({
   propTypes: {
     filePair: React.PropTypes.object.isRequired,
     shrinkToFit: React.PropTypes.bool,
@@ -299,7 +299,7 @@ var ImageSideBySide = React.createClass({
 
 // Two images on top of one another (i.e. "blinked").
 // This component handles toggling between the two images itself.
-var ImageBlinker = React.createClass({
+export var ImageBlinker = React.createClass({
   propTypes: {
     filePair: React.PropTypes.object.isRequired,
     shrinkToFit: React.PropTypes.bool
@@ -359,7 +359,7 @@ var ImageBlinker = React.createClass({
 });
 
 // Two images on top of one another with a cross-fader
-var ImageOnionSkin = React.createClass({
+export var ImageOnionSkin = React.createClass({
   propTypes: {
     filePair: React.PropTypes.object.isRequired,
     shrinkToFit: React.PropTypes.bool,
@@ -372,7 +372,7 @@ var ImageOnionSkin = React.createClass({
 
 // Two images on top of one another with a slider to move the divider from left
 // to right.
-var ImageSwipe = React.createClass({
+export var ImageSwipe = React.createClass({
   propTypes: {
     filePair: React.PropTypes.object.isRequired,
     mode: React.PropTypes.oneOf(['swipe', 'onion-skin']),
@@ -469,7 +469,7 @@ var ImageSwipe = React.createClass({
 });
 
 
-var NoPixelsChanged = React.createClass({
+export var NoPixelsChanged = React.createClass({
   propTypes: {
     filePair: React.PropTypes.object.isRequired
   },

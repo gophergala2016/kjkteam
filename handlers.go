@@ -278,6 +278,7 @@ func handdleGetContentsB(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleKill(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("handleKill, url: '%s'\n", r.URL.Path)
 	os.Exit(0)
 }
 

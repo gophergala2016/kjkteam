@@ -311,10 +311,11 @@ var CodeDiff = React.createClass({
     var beforeDeferred = getOrNull('a', pair.a);
     var afterDeferred = getOrNull('b', pair.b);
 
+    var self = this;
     $.when(beforeDeferred, afterDeferred).done((before, after) => {
-      if (!this.isMounted()) return;
+      if (!self.isMounted()) return;
       // Call out to codediff.js to construct the side-by-side diff.
-      $(this.refs.codediff.getDOMNode()).empty().append(
+      $(self.refs.codediff.getDOMNode()).empty().append(
           renderDiff(pair.a, pair.b, before[0], after[0]));
     })
     .fail((e) => alert("Unable to get diff!"));
