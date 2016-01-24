@@ -16,6 +16,11 @@ const (
 	NotCheckedIn
 )
 
+var (
+	// must match enums above
+	gitTypeNames = []string{"Modified", "Added", "Deleted", "Renamed", "NotCheckedIn"}
+)
+
 type GitChange struct {
 	Type  int // Modified, Added etc.
 	Path  string
@@ -27,8 +32,7 @@ func (c *GitChange) GetName() string {
 }
 
 var (
-	gitPath      string
-	gitTypeNames = []string{"Modified", "Added", "Deleted", "NotCheckedIn"}
+	gitPath string
 )
 
 func gitTypeToString(n int) string {
