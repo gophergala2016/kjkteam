@@ -1,10 +1,11 @@
 Imagine you have uncommited changes in your git repository and want to
 preview them before commiting.
 
-Type `differ` while inside your repo and we'll open default browser with efficient
-UI for previewing the diff. Inception shot:
+Type `differ` and get browser-based, efficient UI for previewing the changes. Inception shot:
 
 ![Differ Screenshot](differ.png)
+
+Use `j`/`k` for next/previous file.
 
 Differ is port of https://github.com/danvk/webdiff to Go.
 
