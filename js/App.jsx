@@ -1,9 +1,9 @@
 import React from 'react';
 import ReactRouter from 'react-router';
 
-import '../www/static/js/util.js';
-import '../www/static/js/image.jsx';
-import { makeRoot } from '../www/static/js/components.jsx';
+import './util.js';
+import './image.jsx';
+import { makeRoot } from './components.jsx';
 
 var Route = ReactRouter.Route;
 var Routes = ReactRouter.Routes;
