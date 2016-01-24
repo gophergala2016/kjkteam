@@ -3,6 +3,10 @@
  */
 'use strict';
 
+import React from 'react';
+
+import { SetIntervalMixin } from './util.js';
+
 var IMAGE_DIFF_MODES = ['side-by-side', 'blink', 'onion-skin', 'swipe'];
 
 // A widget to toggle between image diff modes (blink or side-by-side).
@@ -300,7 +304,7 @@ var ImageBlinker = React.createClass({
     filePair: React.PropTypes.object.isRequired,
     shrinkToFit: React.PropTypes.bool
   },
-  mixins: [SetIntervalMixin],
+  //mixins: [SetIntervalMixin],
   getInitialState: function() {
     return {idx: 0, autoBlink: true};
   },

@@ -4,6 +4,12 @@
  */
 'use strict';
 
+import React from 'react';
+import ReactRouter from 'react-router';
+
+import { IMAGE_DIFF_MODES } from './image.jsx';
+import { filePairDisplayName } from './util.js';
+
 // Perceptual diffing mode
 var PDIFF_MODE = {
   OFF: 0,
@@ -12,7 +18,7 @@ var PDIFF_MODE = {
 };
 
 // Webdiff application root.
-var makeRoot = function(filePairs, initiallySelectedIndex) {
+export var makeRoot = function(filePairs, initiallySelectedIndex) {
   return React.createClass({
     propTypes: {
       filePairs: React.PropTypes.array.isRequired,
@@ -320,3 +326,4 @@ var CodeDiff = React.createClass({
     this.componentDidMount();  // Called on updates.
   }
 });
+
