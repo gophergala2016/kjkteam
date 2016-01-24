@@ -51,6 +51,8 @@ func gitChangeTypeToThickResponseType(typ int) string {
 		return TypeAdd
 	case Deleted:
 		return TypeDelete
+	case Renamed:
+		return TypeMove
 	case NotCheckedIn:
 		return TypeAdd
 	default:
@@ -97,6 +99,11 @@ func ThickResponseFromGitChange(c *GitChange) ThickResponse {
 		res.AfterPath = nil
 		res.contentBefore = gitGetFileContentHeadMust(c.Path)
 		res.contentAfter = nil
+	case Renamed:
+		res.BeforePath = &c.Path
+		res.AfterPath = &c.Path2
+		res.contentBefore = gitGetFileContentHeadMust(c.Path)
+		res.contentAfter = readFileMust(c.Path2)
 	case NotCheckedIn:
 		res.BeforePath = nil
 		res.AfterPath = &c.Path
@@ -266,6 +273,11 @@ func handleGetContents(w http.ResponseWriter, r *http.Request, which string) {
 		d = tr.contentAfter
 	}
 	mime := MimeTypeByExtensionExt(path)
+	// application/json confuses front-end because jQuery ajax
+	// automatically translate those to objects
+	if mime == "application/json" || mime == "application/javascript" {
+		mime = "text/plain"
+	}
 	httpOkBytesWithContentType(w, r, mime, d)
 }
 
@@ -278,6 +290,7 @@ func handdleGetContentsB(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleKill(w http.ResponseWriter, r *http.Request) {
+	fmt.Printf("handleKill, url: '%s'\n", r.URL.Path)
 	os.Exit(0)
 }
 

@@ -8,21 +8,23 @@ import (
 	"strings"
 )
 
+const (
+	Modified = iota
+	Added
+	Deleted
+	Renamed
+	NotCheckedIn
+)
+
 type GitChange struct {
-	Type int // Modified, Added etc.
-	Path string
+	Type  int // Modified, Added etc.
+	Path  string
+	Path2 string // only for Renamed
 }
 
 func (c *GitChange) GetName() string {
 	return filepath.Base(c.Path)
 }
-
-const (
-	Modified = iota
-	Added
-	Deleted
-	NotCheckedIn
-)
 
 var (
 	gitPath      string
@@ -56,6 +58,14 @@ func parseGitStatusLineMust(s string) *GitChange {
 		c.Type = Deleted
 	case "??":
 		c.Type = NotCheckedIn
+	case "R":
+		c.Type = Renamed
+		// www/static/js/file_diff.js -> js/file_diff.js
+		parts = strings.SplitN(parts[1], " -> ", 2)
+		fatalif(len(parts) != 2, "invalid line: '%s'\n", s)
+		c.Path = strings.TrimSpace(parts[0])
+		c.Path2 = strings.TrimSpace(parts[1])
+		return c
 	default:
 		fatalif(true, "invalid line: '%s'\n", s)
 	}

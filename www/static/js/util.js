@@ -7,7 +7,7 @@
  * Returns either "foo.txt" or "{foo -> bar}.txt"
  * filePair is like {type, path, a, b}
  */
-function filePairDisplayName(filePair) {
+export function filePairDisplayName(filePair) {
   if (filePair.type != 'move') {
     return filePair.a || filePair.b;
   }
@@ -47,7 +47,7 @@ function filePairDisplayName(filePair) {
 /**
  * Checks whether the diff is one-sided, i.e. an add or delete.
  */
-function isOneSided(filePair) {
+export function isOneSided(filePair) {
   return (filePair.type == 'add' || filePair.type == 'delete');
 }
 
@@ -55,7 +55,7 @@ function isOneSided(filePair) {
 /**
  * Determines whether the before & after images are the same size.
  */
-function isSameSizeImagePair(filePair) {
+export function isSameSizeImagePair(filePair) {
   if (!filePair.is_image_diff) return false;
   if (isOneSided(filePair)) return false;
   if (!filePair.a || !filePair.b) return false;
@@ -66,7 +66,7 @@ function isSameSizeImagePair(filePair) {
 
 
 // From http://facebook.github.io/react/docs/reusable-components.html
-var SetIntervalMixin = {
+export var SetIntervalMixin = {
   componentWillMount: function() {
     this.intervals = [];
   },
@@ -79,7 +79,7 @@ var SetIntervalMixin = {
 };
 
 
-function makeImage(dataURI) {
+export function makeImage(dataURI) {
   var img = new Image();
   img.src = dataURI;
   return img;

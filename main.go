@@ -32,6 +32,7 @@ func gitStatusExpandDirs(changes []*GitChange) []*GitChange {
 	for _, c := range changes {
 		if !gitStatusShouldExpandDir(c) {
 			res = append(res, c)
+			continue
 		}
 		filepath.Walk(c.Path, func(path string, info os.FileInfo, err error) error {
 			if err != nil {

@@ -4,6 +4,12 @@
  */
 'use strict';
 
+import React from 'react';
+import ReactRouter from 'react-router';
+
+import { IMAGE_DIFF_MODES } from './image.jsx';
+import { filePairDisplayName } from './util.js';
+
 // Perceptual diffing mode
 var PDIFF_MODE = {
   OFF: 0,
@@ -12,7 +18,7 @@ var PDIFF_MODE = {
 };
 
 // Webdiff application root.
-var makeRoot = function(filePairs, initiallySelectedIndex) {
+export var makeRoot = function(filePairs, initiallySelectedIndex) {
   return React.createClass({
     propTypes: {
       filePairs: React.PropTypes.array.isRequired,
@@ -305,10 +311,11 @@ var CodeDiff = React.createClass({
     var beforeDeferred = getOrNull('a', pair.a);
     var afterDeferred = getOrNull('b', pair.b);
 
-    $.when(beforeDeferred, afterDeferred).done((before, after) => {
-      if (!this.isMounted()) return;
+    var self = this;
+    $.when(beforeDeferred, afterDeferred).done(function(before, after) {
+      if (!self.isMounted()) return;
       // Call out to codediff.js to construct the side-by-side diff.
-      $(this.refs.codediff.getDOMNode()).empty().append(
+      $(self.refs.codediff.getDOMNode()).empty().append(
           renderDiff(pair.a, pair.b, before[0], after[0]));
     })
     .fail((e) => alert("Unable to get diff!"));
@@ -320,3 +327,4 @@ var CodeDiff = React.createClass({
     this.componentDidMount();  // Called on updates.
   }
 });
+
