@@ -11,7 +11,7 @@ Use `j`/`k` for next/previous file.
 
 ## Origin story
 
-Differ is a port of https://github.com/danvk/webdiff to Go.
+Differ is a port of https://github.com/danvk/webdiff from Python to Go.
 
 ## Download
 
@@ -20,7 +20,7 @@ Mac binary: [differ](https://dl.dropboxusercontent.com/u/3064436/differ)
 ## Building from sources
 
 Pre-requisites:
-* node, for getting JavaScript libraries used in the front-end
+* node, for getting JavaScript libraries used in the front-end. `brew install node` on mac.
 * `zopfli` (`brew install zopfli` on mac) for maximum compression of
   front-end assets
 

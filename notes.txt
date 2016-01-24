@@ -1,0 +1,9 @@
+## Notes on git integration.
+
+If there is `git-foo` binary in $PATH, doing `git foo`
+will make `git` invoke `git-foo` binary.
+
+This is how webdiff implements `git webdiff` (has `git-webdiff`
+wrapper scripts that invokes `webdiff` proper).
+
+Not sure what the exact protocol between git and the executable is.
