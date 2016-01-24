@@ -28,7 +28,7 @@ gulp.task('jsvendor', function() {
   return gulp.src([
     'node_modules/jquery/dist/jquery.min.js',
     'node_modules/underscore/underscore-min.js',
-    'www/static/components/highlightjs/highlight.pack.js',
+    'js/highlightjs/highlight.pack.js',
     'js/codediff.js/difflib.js',
     'js/codediff.js/codediff.js',
     'js/file_diff.js'

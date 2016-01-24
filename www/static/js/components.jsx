@@ -7,15 +7,8 @@
 import React from 'react';
 import ReactRouter from 'react-router';
 
-import { IMAGE_DIFF_MODES } from './image.jsx';
-import { filePairDisplayName } from './util.js';
-
-// Perceptual diffing mode
-var PDIFF_MODE = {
-  OFF: 0,
-  BBOX: 1,
-  PIXELS: 2
-};
+import { ImageDiff, PDIFF_MODE, IMAGE_DIFF_MODES } from './image.jsx';
+import { filePairDisplayName, isSameSizeImagePair } from './util.js';
 
 // Webdiff application root.
 export var makeRoot = function(filePairs, initiallySelectedIndex) {

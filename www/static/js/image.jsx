@@ -5,7 +5,15 @@
 
 import React from 'react';
 
-import { SetIntervalMixin } from './util.js';
+import { SetIntervalMixin, isOneSided, isSameSizeImagePair } from './util.js';
+
+// Perceptual diffing mode
+export var PDIFF_MODE = {
+  OFF: 0,
+  BBOX: 1,
+  PIXELS: 2
+};
+
 
 export var IMAGE_DIFF_MODES = ['side-by-side', 'blink', 'onion-skin', 'swipe'];
 
