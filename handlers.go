@@ -266,6 +266,11 @@ func handleGetContents(w http.ResponseWriter, r *http.Request, which string) {
 		d = tr.contentAfter
 	}
 	mime := MimeTypeByExtensionExt(path)
+	// application/json confuses front-end because jQuery ajax
+	// automatically translate those to objects
+	if mime == "application/json" || mime == "application/javascript" {
+		mime = "text/plain"
+	}
 	httpOkBytesWithContentType(w, r, mime, d)
 }
 
