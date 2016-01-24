@@ -29,6 +29,9 @@ Build steps:
 * `npm install` to get the needed JavaScript libraries for the front-end
 * `scripts/build.sh` to build a self-contained `differ` executable
 
+## Team
+
+[Krzysztof Kowalczyk](https://github.com/kjk)
 
 ## Todo
 
