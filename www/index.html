@@ -2,14 +2,8 @@
 <html lang="en">
 <head>
   <title>Differ</title>
-
-  <script src="/static/components/jquery/dist/jquery.min.js"></script>
-  <script src="/static/components/underscore/underscore.js"></script>
-  <script src="/static/components/highlightjs/highlight.pack.js"></script>
-  <script src="/static/codediff.js/difflib.js"></script>
-  <script src="/static/codediff.js/codediff.js"></script>
-
   <link rel="stylesheet" href="/static/dist/main.css">
+  <script src="/static/dist/vendor.js"></script>
 </head>
 
 <body>
@@ -17,14 +11,11 @@
 
 <div id="application"></div>
 
-<script src="/static/js/file_diff.js"></script>
-
 <script>
 var pairs = {{ .Pairs }};
 var initialIdx = 0;
 var HAS_IMAGE_MAGICK = false;
 </script>
-
 <script src="/static/dist/bundle.js"></script>
 
 <script>

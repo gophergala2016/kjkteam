@@ -4,6 +4,7 @@ var buffer = require('vinyl-buffer');
 var envify = require('envify/custom');
 var exorcist = require('exorcist');
 var gulp = require('gulp');
+var concat = require('gulp-concat');
 var prefix = require('gulp-autoprefixer');
 var sass = require('gulp-sass');
 var sourcemaps = require('gulp-sourcemaps');
@@ -22,6 +23,19 @@ var t_envify = ['envify', {
 var t_babelify = ['babelify', {
   'presets': ['es2015', 'react']
 }];
+
+gulp.task('jsvendor', function() {
+  return gulp.src([
+    'www/static/components/jquery/dist/jquery.min.js',
+    'www/static/components/underscore/underscore.js',
+    'www/static/components/highlightjs/highlight.pack.js',
+    'www//static/codediff.js/difflib.js',
+    'www/static/codediff.js/codediff.js',
+    'www/static/js/file_diff.js'
+  ])
+  .pipe(concat('vendor.js'))
+  .pipe(gulp.dest('www/static/dist'));
+});
 
 gulp.task('js', function() {
   browserify({
@@ -63,6 +77,6 @@ gulp.task('watch', function() {
   gulp.watch(['sass/*'], ['css']);
 });
 
-gulp.task('build_and_watch', ['css', 'js', 'watch']);
-gulp.task('prod', ['css', 'jsprod']);
-gulp.task('default', ['css', 'js']);
+gulp.task('build_and_watch', ['css', 'js', 'jsvendor', 'watch']);
+gulp.task('prod', ['css', 'jsvendor', 'jsprod']);
+gulp.task('default', ['css', 'jsvendor', 'js']);
