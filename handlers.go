@@ -1,10 +1,13 @@
 package main
 
 import (
+	"archive/zip"
 	"bytes"
 	"compress/gzip"
 	"encoding/json"
+	"errors"
 	"fmt"
+	"io/ioutil"
 	"net/http"
 	"os"
 	"path/filepath"
@@ -21,6 +24,14 @@ var (
 	httpAddr      = "127.0.0.1:6111"
 	mu            sync.Mutex
 	globalChanges []*Change
+
+	// loaded only once at startup. maps a file path of the resource
+	// to its data
+	resourcesFromZip map[string][]byte
+)
+
+const (
+	maxFileSizeToDiff = 1024 * 256 // 256 KB
 )
 
 const (
@@ -61,19 +72,22 @@ func gitChangeTypeToThickResponseType(typ int) string {
 	}
 }
 
-const (
-	// Megabyte is 1024 kilo-bytes
-	Megabyte = 1024 * 1024
-)
+func hasZipResources() bool {
+	return len(resourcesZipData) > 0
+}
 
 func capFileSize(d []byte) []byte {
-	n := len(d)
-	if n > Megabyte {
-		s := fmt.Sprintf("Large file, size: %d bytes", n)
-		return []byte(s)
-	}
-	if http.DetectContentType(d) == "application/octet-stream" {
-		s := fmt.Sprintf("Binary file, size: %d bytes", n)
+	if isBinaryData(d) || len(d) > maxFileSizeToDiff {
+		var s string
+		if isBinaryData(d) && len(d) > maxFileSizeToDiff {
+			s = fmt.Sprintf("Not showing large (%d bytes), binary file. Size limit is %d bytes", len(d), maxFileSizeToDiff)
+		} else {
+			if isBinaryData(d) {
+				s = fmt.Sprintf("Not showing binary file (%d bytes).", len(d))
+			} else {
+				s = fmt.Sprintf("Not showing large (%d bytes) file. Size limit is %d bytes", len(d), maxFileSizeToDiff)
+			}
+		}
 		return []byte(s)
 	}
 	return d
@@ -132,9 +146,105 @@ func buildGlobalChanges(gitChanges []*GitChange) {
 	mu.Unlock()
 }
 
+func normalizePath(s string) string {
+	return strings.Replace(s, "\\", "/", -1)
+}
+
+func loadResourcesFromZipReader(zr *zip.Reader) error {
+	for _, f := range zr.File {
+		name := normalizePath(f.Name)
+		rc, err := f.Open()
+		if err != nil {
+			return err
+		}
+		d, err := ioutil.ReadAll(rc)
+		rc.Close()
+		if err != nil {
+			return err
+		}
+		// for simplicity of the build, the file that we embedded in zip
+		// is bundle.min.js but the html refers to it as bundle.js
+		if name == "s/dist/bundle.min.js" {
+			name = "s/dist/bundle.js"
+		}
+		//LogInfof("Loaded '%s' of size %d bytes\n", name, len(d))
+		resourcesFromZip[name] = d
+	}
+	return nil
+}
+
+// call this only once at startup
+func loadResourcesFromZip(path string) error {
+	resourcesFromZip = make(map[string][]byte)
+	zrc, err := zip.OpenReader(path)
+	if err != nil {
+		return err
+	}
+	defer zrc.Close()
+	return loadResourcesFromZipReader(&zrc.Reader)
+}
+
+func loadResourcesFromEmbeddedZip() error {
+	//LogInfof("loadResourcesFromEmbeddedZip()\n")
+	n := len(resourcesZipData)
+	if n == 0 {
+		return errors.New("len(resourcesZipData) == 0")
+	}
+	resourcesFromZip = make(map[string][]byte)
+	r := bytes.NewReader(resourcesZipData)
+	zrc, err := zip.NewReader(r, int64(n))
+	if err != nil {
+		return err
+	}
+	return loadResourcesFromZipReader(zrc)
+}
+
+func serveData(w http.ResponseWriter, r *http.Request, code int, contentType string, data, gzippedData []byte) {
+	d := data
+	if len(contentType) > 0 {
+		w.Header().Set("Content-Type", contentType)
+	}
+	// https://www.maxcdn.com/blog/accept-encoding-its-vary-important/
+	// prevent caching non-gzipped version
+	w.Header().Add("Vary", "Accept-Encoding")
+
+	if acceptsGzip(r) && len(gzippedData) > 0 {
+		d = gzippedData
+		w.Header().Set("Content-Encoding", "gzip")
+	}
+	w.Header().Set("Content-Length", strconv.Itoa(len(d)))
+	w.WriteHeader(code)
+	w.Write(d)
+}
+
+func serveResourceFromZip(w http.ResponseWriter, r *http.Request, path string) {
+	path = normalizePath(path)
+	fmt.Printf("serving '%s' from zip\n", path)
+
+	data := resourcesFromZip[path]
+	gzippedData := resourcesFromZip[path+".gz"]
+
+	if data == nil {
+		fmt.Printf("no data for file '%s'\n", path)
+		servePlainText(w, r, 404, fmt.Sprintf("file '%s' not found", path))
+		return
+	}
+
+	if len(data) == 0 {
+		servePlainText(w, r, 404, "Asset is empty")
+		return
+	}
+
+	serveData(w, r, 200, MimeTypeByExtensionExt(path), data, gzippedData)
+}
+
 func serveFile(w http.ResponseWriter, r *http.Request, fileName string) {
 	//fmt.Printf("serverFile: fileName='%s'\n", fileName)
 	path := filepath.Join("www", fileName)
+	if hasZipResources() {
+		serveResourceFromZip(w, r, path)
+		return
+	}
 	if u.PathExists(path) {
 		http.ServeFile(w, r, path)
 	} else {
@@ -145,6 +255,24 @@ func serveFile(w http.ResponseWriter, r *http.Request, fileName string) {
 
 func acceptsGzip(r *http.Request) bool {
 	return r != nil && strings.Contains(r.Header.Get("Accept-Encoding"), "gzip")
+}
+
+func writeHeader(w http.ResponseWriter, code int, contentType string) {
+	w.Header().Set("Content-Type", contentType+"; charset=utf-8")
+	w.WriteHeader(code)
+}
+
+func servePlainText(w http.ResponseWriter, r *http.Request, code int, format string, args ...interface{}) {
+	writeHeader(w, code, "text/plain")
+	var err error
+	if len(args) > 0 {
+		_, err = w.Write([]byte(fmt.Sprintf(format, args...)))
+	} else {
+		_, err = w.Write([]byte(format))
+	}
+	if err != nil {
+		fmt.Printf("err: '%s'\n", err)
+	}
 }
 
 func httpOkBytesWithContentType(w http.ResponseWriter, r *http.Request, contentType string, content []byte) {

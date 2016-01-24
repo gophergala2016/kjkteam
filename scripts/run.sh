@@ -6,4 +6,4 @@ set -o pipefail
 
 ./node_modules/.bin/gulp default
 
-go run *.go $@
+go run empty_resources.go handlers.go utils.go git.go main.go	templates.go $@

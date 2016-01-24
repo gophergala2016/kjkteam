@@ -2,6 +2,7 @@ package main
 
 import (
 	"fmt"
+	"io/ioutil"
 	"os"
 	"path/filepath"
 	"strings"
@@ -52,10 +53,26 @@ func gitStatusExpandDirs(changes []*GitChange) []*GitChange {
 	return res
 }
 
+func testDetectContentType() {
+	path := "differ_resources.zip"
+	d, err := ioutil.ReadFile(path)
+	fataliferr(err)
+	fmt.Printf("File '%s', isBinary: %v\n", path, isBinaryData(d))
+	os.Exit(0)
+}
+
 func main() {
 	fmt.Printf("getting list of changed files\n")
+	if false {
+		testDetectContentType()
+	}
 	detectGitExeMust()
 	cdToGitRoot()
+	if hasZipResources() {
+		fmt.Printf("Using resources from zip file\n")
+		loadResourcesFromEmbeddedZip()
+	}
+
 	gitChanges := gitStatusMust()
 	gitChanges = gitStatusExpandDirs(gitChanges)
 	buildGlobalChanges(gitChanges)
