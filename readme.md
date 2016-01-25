@@ -42,4 +42,5 @@ Build steps:
 * -share option that sends data to central server for sharing with other people
 * native mac app
 * native windows app
-* try more random port numbers if can't bind to the one we want
+* try more random port numbers if can't bind to the default
+* minify bundle.js
