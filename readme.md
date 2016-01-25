@@ -17,6 +17,8 @@ Differ is a port of https://github.com/danvk/webdiff from Python to Go.
 
 Mac binary: [differ](https://dl.dropboxusercontent.com/u/3064436/differ)
 
+Must `chmod ug+x differ` after downloading to mark it as executable.
+
 ## Building from sources
 
 Pre-requisites:
