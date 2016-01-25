@@ -21,7 +21,7 @@ type Change struct {
 func dumpGitChanges(gitChanges []*GitChange) {
 	for _, change := range gitChanges {
 		typ := gitTypeToString(change.Type)
-		LogVerbosef("%s, '%s'\n", typ, change.Path)
+		LogVerbosef("%s, '%s'\n", typ, change.GetPath())
 	}
 }
 
@@ -29,7 +29,7 @@ func dumpGitChanges(gitChanges []*GitChange) {
 ?? js/
 */
 func gitStatusShouldExpandDir(c *GitChange) bool {
-	return c.Type == NotCheckedIn && strings.HasSuffix(c.Path, "/")
+	return c.Type == NotCheckedIn && strings.HasSuffix(c.GetPath(), "/")
 }
 
 func gitStatusExpandDirs(changes []*GitChange) []*GitChange {
@@ -39,7 +39,7 @@ func gitStatusExpandDirs(changes []*GitChange) []*GitChange {
 			res = append(res, c)
 			continue
 		}
-		filepath.Walk(c.Path, func(path string, info os.FileInfo, err error) error {
+		filepath.Walk(c.GetPath(), func(path string, info os.FileInfo, err error) error {
 			if err != nil {
 				return err
 			}
@@ -47,8 +47,8 @@ func gitStatusExpandDirs(changes []*GitChange) []*GitChange {
 				return nil
 			}
 			gc := &GitChange{
-				Path: path,
-				Type: NotCheckedIn,
+				PathAfter: path,
+				Type:      NotCheckedIn,
 			}
 			res = append(res, gc)
 			return nil

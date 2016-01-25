@@ -99,34 +99,34 @@ func ThickResponseFromGitChange(c *GitChange) ThickResponse {
 	res.Type = gitChangeTypeToThickResponseType(c.Type)
 	switch c.Type {
 	case Modified:
-		res.BeforePath = &c.Path
-		res.AfterPath = &c.Path
-		res.contentBefore = gitGetFileContentHeadMust(c.Path)
-		res.contentAfter = readFileMust(c.Path)
+		res.BeforePath = &c.PathBefore
+		res.AfterPath = &c.PathBefore
+		res.contentBefore = gitGetFileContentHeadMust(c.PathBefore)
+		res.contentAfter = readFileMust(c.PathBefore)
 	case Added:
 		res.BeforePath = nil
-		res.AfterPath = &c.Path
+		res.AfterPath = &c.PathAfter
 		res.contentBefore = nil
-		res.contentAfter = readFileMust(c.Path)
+		res.contentAfter = readFileMust(c.PathAfter)
 	case Deleted:
-		res.BeforePath = &c.Path
+		res.BeforePath = &c.PathBefore
 		res.AfterPath = nil
-		res.contentBefore = gitGetFileContentHeadMust(c.Path)
+		res.contentBefore = gitGetFileContentHeadMust(c.PathBefore)
 		res.contentAfter = nil
 	case Renamed:
-		res.BeforePath = &c.Path
-		res.AfterPath = &c.Path2
-		res.contentBefore = gitGetFileContentHeadMust(c.Path)
-		res.contentAfter = readFileMust(c.Path2)
+		res.BeforePath = &c.PathBefore
+		res.AfterPath = &c.PathAfter
+		res.contentBefore = gitGetFileContentHeadMust(c.PathBefore)
+		res.contentAfter = readFileMust(c.PathAfter)
 	case NotCheckedIn:
 		res.BeforePath = nil
-		res.AfterPath = &c.Path
+		res.AfterPath = &c.PathAfter
 		res.contentBefore = nil
-		res.contentAfter = readFileMust(c.Path)
+		res.contentAfter = readFileMust(c.PathAfter)
 	}
 	res.contentBefore = capFileSize(res.contentBefore)
 	res.contentAfter = capFileSize(res.contentAfter)
-	res.IsImage = isImageFile(c.Path)
+	res.IsImage = isImageFile(c.GetPath())
 	res.NoChanges = bytes.Equal(res.contentBefore, res.contentAfter)
 	return res
 }
