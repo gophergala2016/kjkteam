@@ -49,3 +49,4 @@ Build steps:
 * native windows app
 * try more random port numbers if can't bind to the default
 * minify bundle.js
+
