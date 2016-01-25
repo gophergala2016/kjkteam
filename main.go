@@ -62,18 +62,17 @@ func parseFlags() {
 	flag.Parse()
 }
 
-func dumpDirDiffs(dirDiffs []*DirDiffEntry) {
-	for _, e := range dirDiffs {
-		tp := gitTypeToString(e.Type)
-		fmt.Printf("'%s', '%s', %s\n", e.PathBefore, e.PathAfter, tp)
-	}
-}
-
 func main() {
 	parseFlags()
 	if flgDev {
 		verboseLogging = true
 	}
+
+	if hasZipResources() {
+		LogVerbosef("Using resources from zip file\n")
+		loadResourcesFromEmbeddedZip()
+	}
+
 	args := flag.Args()
 	if len(args) == 2 {
 		dirBefore := args[0]
@@ -84,17 +83,19 @@ func main() {
 			LogErrorf("dirDiff() failed with '%s'\n", err)
 			os.Exit(1)
 		}
-		dumpDirDiffs(dirDiffs)
+		dumpGitChanges(dirDiffs)
+		buildGlobalChangesFromDirDiffs(dirDiffs)
+		if len(globalChanges) == 0 {
+			fmt.Printf("There are no changes!\n")
+			os.Exit(0)
+		}
+		startWebServer()
 		os.Exit(0)
 	}
 
 	LogVerbosef("getting list of changed files\n")
 	detectGitExeMust()
 	cdToGitRoot()
-	if hasZipResources() {
-		LogVerbosef("Using resources from zip file\n")
-		loadResourcesFromEmbeddedZip()
-	}
 
 	gitChanges := gitStatusMust()
 	gitChanges = gitStatusExpandDirs(gitChanges)

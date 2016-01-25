@@ -131,18 +131,71 @@ func ThickResponseFromGitChange(c *GitChange) ThickResponse {
 	return res
 }
 
-func buildGlobalChanges(gitChanges []*GitChange) {
-	var changes []*Change
-	for i, c := range gitChanges {
+// ThickResponseFromDirDiffs creates ThickResponse out of GitChange
+func ThickResponseFromDirDiffs(c *GitChange) ThickResponse {
+	var res ThickResponse
+	res.Type = gitChangeTypeToThickResponseType(c.Type)
+	switch c.Type {
+	case Modified:
+		res.BeforePath = &c.PathBefore
+		res.AfterPath = &c.PathAfter
+		res.contentBefore = readFileMust(c.PathBefore)
+		res.contentAfter = readFileMust(c.PathAfter)
+	case Added:
+		res.BeforePath = nil
+		res.AfterPath = &c.PathAfter
+		res.contentBefore = nil
+		res.contentAfter = readFileMust(c.PathAfter)
+	case Deleted:
+		res.BeforePath = &c.PathBefore
+		res.AfterPath = nil
+		res.contentBefore = readFileMust(c.PathBefore)
+		res.contentAfter = nil
+	case Renamed:
+		res.BeforePath = &c.PathBefore
+		res.AfterPath = &c.PathAfter
+		res.contentBefore = readFileMust(c.PathBefore)
+		res.contentAfter = readFileMust(c.PathAfter)
+	case NotCheckedIn:
+		res.BeforePath = nil
+		res.AfterPath = &c.PathAfter
+		res.contentBefore = nil
+		res.contentAfter = readFileMust(c.PathAfter)
+	}
+	res.contentBefore = capFileSize(res.contentBefore)
+	res.contentAfter = capFileSize(res.contentAfter)
+	res.IsImage = isImageFile(c.GetPath())
+	res.NoChanges = bytes.Equal(res.contentBefore, res.contentAfter)
+	return res
+}
+
+func buildGlobalChanges(changes []*GitChange) {
+	var res []*Change
+	for i, c := range changes {
 		gc := &Change{}
 		gc.GitChange = *c
 		gc.ThickResponse = ThickResponseFromGitChange(c)
 		gc.ThickResponse.Index = i
-		changes = append(changes, gc)
+		res = append(res, gc)
 	}
 
 	mu.Lock()
-	globalChanges = changes
+	globalChanges = res
+	mu.Unlock()
+}
+
+func buildGlobalChangesFromDirDiffs(changes []*GitChange) {
+	var res []*Change
+	for i, c := range changes {
+		gc := &Change{}
+		gc.GitChange = *c
+		gc.ThickResponse = ThickResponseFromDirDiffs(c)
+		gc.ThickResponse.Index = i
+		res = append(res, gc)
+	}
+
+	mu.Lock()
+	globalChanges = res
 	mu.Unlock()
 }
 

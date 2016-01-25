@@ -8,14 +8,6 @@ import (
 	"strings"
 )
 
-// DirDiffEntry describes a single file difference between
-// files in two directories
-type DirDiffEntry struct {
-	PathBefore string
-	PathAfter  string
-	Type       int
-}
-
 func dirExists(path string) bool {
 	st, err := os.Stat(path)
 	if err != nil {
@@ -102,12 +94,12 @@ func fileInfosToMap(fileInfos []FileInfo) map[string]int64 {
 	return res
 }
 
-func calcDirDiffs(rootBefore, rootAfter string, filesBefore, filesAfter map[string]int64) ([]*DirDiffEntry, error) {
-	var res []*DirDiffEntry
+func calcDirDiffs(rootBefore, rootAfter string, filesBefore, filesAfter map[string]int64) ([]*GitChange, error) {
+	var res []*GitChange
 	for pathBefore, sizeBefore := range filesBefore {
 		fullPathBefore := filepath.Join(rootBefore, pathBefore)
 		fullPathAfter := filepath.Join(rootAfter, pathBefore)
-		var e DirDiffEntry
+		var e GitChange
 		sizeAfter, exists := filesAfter[pathBefore]
 		if !exists {
 			e.PathBefore = fullPathBefore
@@ -142,7 +134,7 @@ func calcDirDiffs(rootBefore, rootAfter string, filesBefore, filesAfter map[stri
 
 	for _, pathAfter := range pathsAfter {
 		fullPathAfter := filepath.Join(rootAfter, pathAfter)
-		e := DirDiffEntry{
+		e := GitChange{
 			PathBefore: "",
 			PathAfter:  fullPathAfter,
 			Type:       Added,
@@ -153,7 +145,7 @@ func calcDirDiffs(rootBefore, rootAfter string, filesBefore, filesAfter map[stri
 	return res, nil
 }
 
-func dirDiff(pathBefore, pathAfter string) ([]*DirDiffEntry, error) {
+func dirDiff(pathBefore, pathAfter string) ([]*GitChange, error) {
 	filesBefore, err := getFilesRecur(pathBefore)
 	if err != nil {
 		return nil, err

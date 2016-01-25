@@ -9,6 +9,10 @@ Type `differ` and get browser-based, efficient UI for previewing the changes. In
 
 Use `j`/`k` for next/previous file.
 
+## One more thing
+
+You can also diff 2 directories: `differ ${dir1} ${dir2}`
+
 ## Origin story
 
 Differ is a port of https://github.com/danvk/webdiff from Python to Go.
@@ -37,7 +41,6 @@ Build steps:
 
 ## Todo
 
-* directory compare
 * `git scdiff` support
 * refresh the diff on / reload and on "focus" event on window
 * support for diffing images
