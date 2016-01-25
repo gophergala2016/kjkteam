@@ -5,6 +5,7 @@ import (
 	"io"
 	"os"
 	"path/filepath"
+	"strings"
 )
 
 // DirDiffEntry describes a single file difference between
@@ -37,6 +38,12 @@ func getFilesRecur(dir string) ([]FileInfo, error) {
 		}
 		if !info.Mode().IsRegular() {
 			return nil
+		}
+		if strings.HasPrefix(path, dir) {
+			path = path[len(dir):]
+			if strings.HasPrefix(path, "/") {
+				path = path[1:]
+			}
 		}
 		fi := FileInfo{
 			Path: path,
@@ -95,8 +102,55 @@ func fileInfosToMap(fileInfos []FileInfo) map[string]int64 {
 	return res
 }
 
-func calcDirDiffs(filesBefore, filesAfter map[string]int64) ([]*DirDiffEntry, error) {
-	return nil, nil
+func calcDirDiffs(rootBefore, rootAfter string, filesBefore, filesAfter map[string]int64) ([]*DirDiffEntry, error) {
+	var res []*DirDiffEntry
+	for pathBefore, sizeBefore := range filesBefore {
+		fullPathBefore := filepath.Join(rootBefore, pathBefore)
+		fullPathAfter := filepath.Join(rootAfter, pathBefore)
+		var e DirDiffEntry
+		sizeAfter, exists := filesAfter[pathBefore]
+		if !exists {
+			e.PathBefore = fullPathBefore
+			e.Type = Deleted
+			res = append(res, &e)
+		} else {
+			if sizeBefore != sizeAfter {
+				e.PathBefore = fullPathBefore
+				e.PathAfter = fullPathAfter
+				e.Type = Modified
+				res = append(res, &e)
+			} else {
+				areEqual, err := filesEqual(fullPathBefore, fullPathAfter)
+				if err != nil {
+					return nil, err
+				}
+				if !areEqual {
+					e.PathBefore = fullPathBefore
+					e.PathAfter = fullPathAfter
+					res = append(res, &e)
+				}
+			}
+		}
+	}
+
+	var pathsAfter []string
+	for pathAfter := range filesAfter {
+		if _, exists := filesBefore[pathAfter]; !exists {
+			pathsAfter = append(pathsAfter, pathAfter)
+		}
+	}
+
+	for _, pathAfter := range pathsAfter {
+		fullPathAfter := filepath.Join(rootAfter, pathAfter)
+		e := DirDiffEntry{
+			PathBefore: "",
+			PathAfter:  fullPathAfter,
+			Type:       Added,
+		}
+		res = append(res, &e)
+	}
+
+	return res, nil
 }
 
 func dirDiff(pathBefore, pathAfter string) ([]*DirDiffEntry, error) {
@@ -112,5 +166,5 @@ func dirDiff(pathBefore, pathAfter string) ([]*DirDiffEntry, error) {
 	filesBeforeMap := fileInfosToMap(filesBefore)
 	filesAfterMap := fileInfosToMap(filesAfter)
 
-	return calcDirDiffs(filesBeforeMap, filesAfterMap)
+	return calcDirDiffs(pathBefore, pathAfter, filesBeforeMap, filesAfterMap)
 }

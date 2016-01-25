@@ -62,11 +62,32 @@ func parseFlags() {
 	flag.Parse()
 }
 
+func dumpDirDiffs(dirDiffs []*DirDiffEntry) {
+	for _, e := range dirDiffs {
+		tp := gitTypeToString(e.Type)
+		fmt.Printf("'%s', '%s', %s\n", e.PathBefore, e.PathAfter, tp)
+	}
+}
+
 func main() {
 	parseFlags()
 	if flgDev {
 		verboseLogging = true
 	}
+	args := flag.Args()
+	if len(args) == 2 {
+		dirBefore := args[0]
+		dirAfter := args[1]
+		LogVerbosef("comparing 2 directories: '%s' and '%s'\n", dirBefore, dirAfter)
+		dirDiffs, err := dirDiff(dirBefore, dirAfter)
+		if err != nil {
+			LogErrorf("dirDiff() failed with '%s'\n", err)
+			os.Exit(1)
+		}
+		dumpDirDiffs(dirDiffs)
+		os.Exit(0)
+	}
+
 	LogVerbosef("getting list of changed files\n")
 	detectGitExeMust()
 	cdToGitRoot()
